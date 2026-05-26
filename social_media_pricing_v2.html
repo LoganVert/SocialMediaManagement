@@ -1,0 +1,238 @@
+
+<style>
+  .root { padding: 1rem 0; font-family: var(--font-sans); }
+  .sec-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .toggle-row { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .toggle-btn { padding: 6px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; font-size: 14px; transition: all 0.15s; }
+  .toggle-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+  .plat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .plat-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+  .plat-card.featured { border: 2px solid var(--color-border-info); }
+  .plat-badge { display: inline-block; background: var(--color-background-info); color: var(--color-text-info); font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); margin-bottom: 6px; }
+  .plat-icon { font-size: 20px; margin-bottom: 8px; color: var(--color-text-secondary); }
+  .plat-name { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .plat-price { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+  .plat-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .total-card { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .bklist { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+  .bklist li { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 14px; color: var(--color-text-primary); }
+  .bklist li:last-child { border-bottom: none; }
+  .li-muted { color: var(--color-text-secondary); }
+  .addon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .addon-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; }
+  .addon-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .addon-type { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .addon-price { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .addon-note { font-size: 12px; color: var(--color-text-secondary); }
+  .addon-counter { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .addon-counter button { width: 26px; height: 26px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; cursor: pointer; font-size: 16px; line-height: 1; color: var(--color-text-primary); display: flex; align-items: center; justify-content: center; }
+  .addon-count { font-size: 14px; font-weight: 500; min-width: 20px; text-align: center; color: var(--color-text-primary); }
+  .addon-subtotal { font-size: 12px; color: var(--color-text-secondary); margin-left: auto; }
+  .follower-section { margin-bottom: 1.5rem; }
+  .follower-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .follower-tier-badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: var(--border-radius-md); font-weight: 500; }
+  .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .tip-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; font-size: 13px; }
+  .tip-title { font-weight: 500; margin-bottom: 4px; color: var(--color-text-primary); }
+  .tip-body { color: var(--color-text-secondary); line-height: 1.5; }
+  .grand-total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0 4px; border-top: 0.5px solid var(--color-border-primary); margin-top: 4px; }
+</style>
+
+<div class="root">
+  <h2 style="position:absolute;left:-9999px" class="sr-only">Social media pricing calculator with add-ons and follower tiers</h2>
+
+  <div class="sec-label">Post frequency</div>
+  <div class="toggle-row">
+    <button class="toggle-btn active" onclick="setFreq('low')">1 post/day (~30/mo)</button>
+    <button class="toggle-btn" onclick="setFreq('high')">3 posts/week, excl. Sunday (~13/mo)</button>
+  </div>
+
+  <div class="sec-label">Per-platform monthly estimate</div>
+  <div class="plat-grid" id="plat-grid"></div>
+
+  <div class="total-card">
+    <div>
+      <div style="font-size:14px;color:var(--color-text-secondary)">Base retainer (all 3 platforms)</div>
+      <div style="font-size:28px;font-weight:500;color:var(--color-text-primary)" id="base-total">$0</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)" id="base-note"></div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:13px;color:var(--color-text-secondary)">Approx. per post</div>
+      <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)" id="per-post">$0</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Follower tier adjustment</div>
+  <div class="follower-section">
+    <div class="follower-row">
+      <label style="font-size:14px;color:var(--color-text-secondary);min-width:80px">Followers</label>
+      <input type="range" min="0" max="4" step="1" value="0" id="follower-slider" style="flex:1" oninput="setTier(this.value)">
+      <span style="font-size:14px;font-weight:500;min-width:90px;text-align:right" id="tier-label">Under 2k</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-secondary);padding:0 2px;margin-bottom:10px">
+      <span>&lt;2k</span><span>2k–10k</span><span>10k–50k</span><span>50k–100k</span><span>100k+</span>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:13px;color:var(--color-text-secondary)" id="tier-desc">Starting tier — base rate applies</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px" id="tier-reason"></div>
+      </div>
+      <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);min-width:70px;text-align:right" id="tier-adj">+$0/mo</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Additional / surprise posts</div>
+  <div class="addon-grid" id="addon-grid"></div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:13px;color:var(--color-text-secondary)">Add-on subtotal</span>
+    <span style="font-size:16px;font-weight:500;color:var(--color-text-primary)" id="addon-total">$0</span>
+  </div>
+
+  <div class="sec-label">Monthly total</div>
+  <ul class="bklist" id="bklist"></ul>
+
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-title">Retainer vs per-post</div>
+      <div class="tip-body">Quote add-ons at a slightly higher per-post rate than your retainer — no economy of scale on one-offs.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">Skits take longer</div>
+      <div class="tip-body">A skit isn't a graphic post. Charge for concept, script, edit, and revision rounds separately.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">Follower raises</div>
+      <div class="tip-body">Build tier increases into your contract up front so raises aren't a surprise — they're tied to the account's growth.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">Future paid ads</div>
+      <div class="tip-body">When ads come, charge 10–15% of ad spend or a flat $300–$600/mo on top of the retainer.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const platforms = [
+  { name: 'Instagram', icon: 'ti-photo', featured: false,
+    rates: { low: 450, high: 225 },
+    notes: { low: '~30 posts · graphics + captions', high: '~13 posts · graphics + captions' } },
+  { name: 'Facebook', icon: 'ti-brand-facebook', featured: false,
+    rates: { low: 350, high: 175 },
+    notes: { low: '~30 posts · shared + native content', high: '~13 posts · shared + native content' } },
+  { name: 'TikTok', icon: 'ti-brand-tiktok', featured: true,
+    rates: { low: 500, high: 250 },
+    notes: { low: '~30 posts · skits + trending hooks', high: '~13 posts · skits + trending hooks' } },
+];
+
+const tiers = [
+  { label: 'Under 2k', adj: 0, desc: 'Starting tier — base rate applies', reason: 'Building from scratch; standard workload' },
+  { label: '2k – 10k', adj: 175, desc: 'Growing — light community mgmt increase', reason: 'More DMs, comments, and engagement to manage' },
+  { label: '10k – 50k', adj: 400, desc: 'Established — meaningful extra workload', reason: 'Higher stakes content + heavier community management' },
+  { label: '50k – 100k', adj: 650, desc: 'High-volume — consider renegotiating', reason: 'Significant daily engagement; content quality pressure rises' },
+  { label: '100k+', adj: 950, desc: 'Influencer-tier — full contract review', reason: 'Renegotiate scope, hours, and deliverables entirely' },
+];
+
+const addons = [
+  { type: 'Static graphic post', icon: 'ti-photo', rate: 35, note: 'Caption + designed graphic', count: 0 },
+  { type: 'Caption only', icon: 'ti-align-left', rate: 18, note: 'Client provides the asset', count: 0 },
+  { type: 'Skit / video concept', icon: 'ti-movie', rate: 110, note: 'Script, edit & revisions', count: 0 },
+  { type: 'Story / quick promo', icon: 'ti-layout-bottombar', rate: 20, note: 'Single-frame or short clip', count: 0 },
+];
+
+let freq = 'low';
+let tierIdx = 0;
+
+const fmt = n => '$' + Math.round(n).toLocaleString();
+
+function setFreq(f) {
+  freq = f;
+  document.querySelectorAll('.toggle-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && f === 'low') || (i === 1 && f === 'high'));
+  });
+  render();
+}
+
+function setTier(v) {
+  tierIdx = parseInt(v);
+  render();
+}
+
+function changeAddon(i, delta) {
+  addons[i].count = Math.max(0, addons[i].count + delta);
+  render();
+}
+
+function renderPlatforms() {
+  document.getElementById('plat-grid').innerHTML = platforms.map(p => `
+    <div class="plat-card ${p.featured ? 'featured' : ''}">
+      ${p.featured ? '<div class="plat-badge">Most time-intensive</div>' : ''}
+      <div class="plat-icon"><i class="ti ${p.icon}" aria-hidden="true"></i></div>
+      <div class="plat-name">${p.name}</div>
+      <div class="plat-price">${fmt(p.rates[freq])}<span style="font-size:14px;font-weight:400;color:var(--color-text-secondary)">/mo</span></div>
+      <div class="plat-sub">${p.notes[freq]}</div>
+    </div>
+  `).join('');
+}
+
+function renderAddons() {
+  document.getElementById('addon-grid').innerHTML = addons.map((a, i) => `
+    <div class="addon-card">
+      <div class="addon-row">
+        <span class="addon-type"><i class="ti ${a.icon}" style="font-size:14px;margin-right:5px;vertical-align:-1px" aria-hidden="true"></i>${a.type}</span>
+        <span class="addon-price">${fmt(a.rate)}</span>
+      </div>
+      <div class="addon-note">${a.note}</div>
+      <div class="addon-counter">
+        <button onclick="changeAddon(${i}, -1)" aria-label="decrease">−</button>
+        <span class="addon-count">${a.count}</span>
+        <button onclick="changeAddon(${i}, 1)" aria-label="increase">+</button>
+        <span class="addon-subtotal">${a.count > 0 ? fmt(a.count * a.rate) : ''}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function render() {
+  renderPlatforms();
+  renderAddons();
+
+  const postCount = freq === 'low' ? 30 : 13;
+  const platformTotal = platforms.reduce((s, p) => s + p.rates[freq], 0);
+  const community = freq === 'low' ? 200 : 150;
+  const strategy = freq === 'low' ? 150 : 100;
+  const baseRetainer = platformTotal + community + strategy;
+  const tierAdj = tiers[tierIdx].adj;
+  const addonTotal = addons.reduce((s, a) => s + a.count * a.rate, 0);
+  const grandTotal = baseRetainer + tierAdj + addonTotal;
+  const totalPosts = postCount * 3;
+  const perPost = Math.round(baseRetainer / totalPosts);
+
+  document.getElementById('base-total').textContent = fmt(baseRetainer);
+  document.getElementById('base-note').textContent = freq === 'low'
+    ? 'Approx. 80–100 hrs/mo across all platforms'
+    : 'Approx. 35–50 hrs/mo across all platforms';
+  document.getElementById('per-post').textContent = fmt(perPost) + '/post';
+
+  const t = tiers[tierIdx];
+  document.getElementById('tier-label').textContent = t.label;
+  document.getElementById('tier-desc').textContent = t.desc;
+  document.getElementById('tier-reason').textContent = t.reason;
+  document.getElementById('tier-adj').textContent = t.adj === 0 ? '+$0/mo' : '+' + fmt(t.adj) + '/mo';
+
+  document.getElementById('addon-total').textContent = fmt(addonTotal);
+
+  document.getElementById('bklist').innerHTML = `
+    <li><span class="li-muted">Base retainer (content + community + strategy)</span><span>${fmt(baseRetainer)}</span></li>
+    <li><span class="li-muted">Follower tier adjustment (${t.label})</span><span>+${fmt(tierAdj)}</span></li>
+    <li><span class="li-muted">Additional / surprise posts</span><span>+${fmt(addonTotal)}</span></li>
+    <li style="border-bottom:none">
+      <div class="grand-total-row" style="width:100%">
+        <span style="font-weight:500">Total monthly invoice</span>
+        <span style="font-weight:500;font-size:20px">${fmt(grandTotal)}</span>
+      </div>
+    </li>
+  `;
+}
+
+render();
+</script>
